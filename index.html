@@ -1,0 +1,564 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <title>Live Streaming</title>
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <style>
+        body {
+            background: #f4f4f4;
+            font-family: system-ui;
+            margin-bottom: 80px;
+        }
+
+        .topbar {
+            background: white;
+            padding: 10px;
+            position: sticky;
+            top: 0;
+            z-index: 999;
+        }
+
+        .search {
+            border-radius: 25px;
+        }
+
+        .tabs {
+            overflow-x: auto;
+            white-space: nowrap;
+            background: white;
+            padding: 8px;
+        }
+
+        .tabs a {
+            text-decoration: none;
+            color: black
+        }
+
+        .tabs span {
+            display: inline-block;
+            padding: 6px 14px;
+            margin-right: 8px;
+            background: #eee;
+            border-radius: 20px;
+            font-size: 13px;
+        }
+
+        .tabs span.active {
+            background: #ff2f7a;
+            color: white;
+        }
+
+        .live-card {
+            position: relative;
+            border-radius: 14px;
+            overflow: hidden;
+        }
+
+        .live-card img {
+            width: 100%;
+            height: 260px;
+            object-fit: cover;
+        }
+
+        .live-badge {
+            position: absolute;
+            top: 8px;
+            left: 8px;
+            background: red;
+            color: white;
+            font-size: 11px;
+            padding: 3px 8px;
+            border-radius: 20px;
+        }
+
+        .viewer {
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            background: rgba(0, 0, 0, 0.6);
+            color: white;
+            font-size: 12px;
+            padding: 3px 8px;
+            border-radius: 20px;
+        }
+
+        .overlay {
+            position: absolute;
+            bottom: 0;
+            width: 100%;
+            padding: 10px;
+            color: white;
+            background: linear-gradient(transparent, rgba(0, 0, 0, 0.85));
+        }
+
+        .join {
+            background: #ff2f7a;
+            border: none;
+            color: white;
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+        }
+
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            background: white;
+            border-top: 1px solid #ddd;
+            display: flex;
+            justify-content: space-around;
+            padding: 8px 0;
+            text-decoration: none;
+        }
+
+        .bottom-nav a {
+            text-decoration: none;
+            color: black;
+        }
+
+        .bottom-nav div {
+            text-align: center;
+            font-size: 11px;
+        }
+
+        .bottom-nav span {
+            font-size: 22px;
+            display: block;
+        }
+
+        .room-link {
+            text-decoration: none;
+            color: white;
+        }
+    </style>
+
+</head>
+
+<body>
+
+    <div class="topbar">
+        <input class="form-control search" placeholder="Search Anchor / Room">
+    </div>
+
+    <div class="tabs">
+        <a href="/"><span class="active">Live</span></a>
+        <a href="/"><span>Nearby</span></a>
+        <a href="/"><span>PK</span></a>
+        <a href="/"><span>Gaming</span></a>
+        <a href="/"><span>Music</span></a>
+        <a href="/"><span>Chat</span></a>
+    </div>
+
+    <div class="container mt-3">
+        <div class="row g-3" id="rooms"></div>
+    </div>
+
+    <div class="bottom-nav">
+        <div><a href="/"><span>🏠</span>Home</a></div>
+        <div><a href="/"><span>📡</span>Live</a></div>
+        <div><a href="/"><span>🎮</span>Games</a></div>
+        <div><a href="/"><span>🎁</span>Activity</a></div>
+        <div><a href="/"><span>👤</span>Me</a></div>
+    </div>
+
+
+    <script>
+        // Base URL otomatis mengikuti domain saat ini
+        const baseURL = window.location.origin + "/home/img/";
+
+        // Daftar gambar
+        const photos = [
+            baseURL + "1.jpg",
+            baseURL + "2.jpg",
+            baseURL + "3.jpg",
+            baseURL + "4.jpg",
+            baseURL + "5.jpg",
+            baseURL + "6.jpg",
+            baseURL + "7.jpg",
+            baseURL + "8.jpg",
+            baseURL + "9.jpg",
+            baseURL + "10.jpg",
+            baseURL + "11.jpg",
+            baseURL + "12.jpg",
+            baseURL + "13.jpg",
+            baseURL + "14.jpg",
+            baseURL + "15.jpg",
+            baseURL + "16.jpg",
+            baseURL + "17.jpg",
+            baseURL + "18.jpg",
+            baseURL + "19.jpg",
+            baseURL + "20.jpg",
+            baseURL + "21.jpg",
+            baseURL + "22.jpg",
+            baseURL + "23.jpg",
+            baseURL + "24.jpg",
+            baseURL + "25.jpg",
+            baseURL + "26.jpg",
+            baseURL + "27.jpg",
+            baseURL + "28.jpg",
+            baseURL + "29.jpg",
+            baseURL + "30.jpg",
+            baseURL + "31.jpg",
+            baseURL + "32.jpg",
+            baseURL + "33.jpg",
+            baseURL + "34.jpg",
+            baseURL + "35.jpg",
+            baseURL + "36.jpg",
+            baseURL + "37.jpg",
+            baseURL + "38.jpg",
+            baseURL + "39.jpg",
+            baseURL + "40.jpg",
+            baseURL + "41.jpg",
+            baseURL + "42.jpg",
+            baseURL + "43.jpg",
+            baseURL + "44.jpg",
+            baseURL + "45.jpg",
+            baseURL + "46.jpg",
+            baseURL + "47.jpg",
+            baseURL + "48.jpg",
+            baseURL + "49.jpg",
+            baseURL + "50.jpg",
+            baseURL + "51.jpg",
+            baseURL + "52.jpg",
+            baseURL + "53.jpg",
+            baseURL + "54.jpg",
+            baseURL + "55.jpg",
+            baseURL + "56.jpg",
+            baseURL + "57.jpg",
+            baseURL + "58.jpg",
+            baseURL + "59.jpg",
+            baseURL + "60.jpg",
+            baseURL + "61.jpg",
+            baseURL + "62.jpg",
+            baseURL + "63.jpg",
+            baseURL + "64.jpg",
+            baseURL + "65.jpg",
+            baseURL + "66.jpg",
+            baseURL + "67.jpg",
+            baseURL + "68.jpg",
+            baseURL + "69.jpg",
+            baseURL + "70.jpg",
+            baseURL + "71.jpg",
+            baseURL + "72.jpg",
+            baseURL + "73.jpg",
+            baseURL + "74.jpg",
+            baseURL + "75.jpg",
+            baseURL + "76.jpg",
+            baseURL + "77.jpg",
+            baseURL + "78.jpg",
+            baseURL + "79.jpg",
+            baseURL + "80.jpg",
+            baseURL + "81.jpg",
+            baseURL + "82.jpg",
+            baseURL + "83.jpg",
+            baseURL + "84.jpg",
+            baseURL + "85.jpg",
+            baseURL + "86.jpg",
+            baseURL + "87.jpg",
+            baseURL + "88.jpg",
+            baseURL + "89.jpg",
+            baseURL + "90.jpg",
+            baseURL + "91.jpg",
+            baseURL + "92.jpg",
+            baseURL + "93.jpg",
+            baseURL + "94.jpg",
+            baseURL + "95.jpg",
+            baseURL + "96.jpg",
+            baseURL + "97.jpg",
+            baseURL + "98.jpg",
+            baseURL + "99.jpg",
+            baseURL + "100.jpg",
+            baseURL + "101.jpg",
+            baseURL + "102.jpg",
+            baseURL + "103.jpg",
+            baseURL + "104.jpg",
+            baseURL + "105.jpg",
+            baseURL + "106.jpg",
+            baseURL + "107.jpg",
+            baseURL + "108.jpg",
+            baseURL + "109.jpg",
+            baseURL + "110.jpg",
+            baseURL + "111.jpg",
+            baseURL + "112.jpg",
+            baseURL + "113.jpg",
+            baseURL + "114.jpg",
+            baseURL + "115.jpg",
+            baseURL + "116.jpg",
+            baseURL + "117.jpg",
+            baseURL + "118.jpg",
+            baseURL + "119.jpg",
+            baseURL + "120.jpg",
+            baseURL + "121.jpg",
+            baseURL + "122.jpg",
+            baseURL + "123.jpg",
+            baseURL + "124.jpg",
+            baseURL + "125.jpg",
+            baseURL + "126.jpg",
+            baseURL + "127.jpg",
+            baseURL + "128.jpg",
+            baseURL + "129.jpg",
+            baseURL + "130.jpg",
+            baseURL + "131.jpg",
+            baseURL + "132.jpg",
+            baseURL + "133.jpg",
+            baseURL + "134.jpg",
+            baseURL + "135.jpg",
+            baseURL + "136.jpg",
+            baseURL + "137.jpg",
+            baseURL + "138.jpg",
+            baseURL + "139.jpg",
+            baseURL + "140.jpg",
+            baseURL + "141.jpg",
+            baseURL + "142.jpg",
+            baseURL + "143.jpg",
+            baseURL + "144.jpg",
+            baseURL + "145.jpg",
+            baseURL + "146.jpg",
+            baseURL + "147.jpg",
+            baseURL + "148.jpg",
+            baseURL + "149.jpg",
+            baseURL + "150.jpg",
+            baseURL + "151.jpg",
+            baseURL + "152.jpg",
+            baseURL + "153.jpg",
+            baseURL + "154.jpg",
+            baseURL + "155.jpg",
+            baseURL + "156.jpg",
+            baseURL + "157.jpg",
+            baseURL + "158.jpg",
+            baseURL + "159.jpg",
+            baseURL + "160.jpg",
+            baseURL + "161.jpg",
+            baseURL + "162.jpg",
+            baseURL + "163.jpg",
+            baseURL + "164.jpg",
+            baseURL + "165.jpg",
+            baseURL + "166.jpg",
+            baseURL + "167.jpg",
+            baseURL + "168.jpg",
+            baseURL + "169.jpg",
+            baseURL + "170.jpg",
+            baseURL + "171.jpg",
+            baseURL + "172.jpg",
+            baseURL + "173.jpg",
+            baseURL + "174.jpg",
+            baseURL + "175.jpg",
+            baseURL + "176.jpg",
+            baseURL + "177.jpg",
+            baseURL + "178.jpg",
+            baseURL + "179.jpg",
+            baseURL + "180.jpg",
+            baseURL + "181.jpg",
+            baseURL + "182.jpg",
+            baseURL + "183.jpg",
+            baseURL + "184.jpg",
+            baseURL + "185.jpg",
+            baseURL + "186.jpg",
+            baseURL + "187.jpg",
+            baseURL + "188.jpg",
+            baseURL + "189.jpg",
+            baseURL + "190.jpg",
+            baseURL + "191.jpg",
+            baseURL + "192.jpg",
+            baseURL + "193.jpg",
+            baseURL + "194.jpg",
+            baseURL + "195.jpg",
+            baseURL + "196.jpg",
+            baseURL + "197.jpg",
+            baseURL + "198.jpg",
+            baseURL + "199.jpg",
+            baseURL + "200.jpg",
+            baseURL + "201.jpg",
+            baseURL + "202.jpg",
+            baseURL + "203.jpg",
+            baseURL + "204.jpg",
+            baseURL + "205.jpg",
+            baseURL + "206.jpg",
+            baseURL + "207.jpg",
+            baseURL + "208.jpg",
+            baseURL + "209.jpg",
+            baseURL + "210.jpg",
+            baseURL + "211.jpg",
+            baseURL + "212.jpg",
+            baseURL + "213.jpg",
+            baseURL + "214.jpg",
+            baseURL + "215.jpg",
+            baseURL + "216.jpg",
+            baseURL + "217.jpg",
+            baseURL + "218.jpg",
+            baseURL + "219.jpg",
+            baseURL + "220.jpg",
+            baseURL + "221.jpg",
+            baseURL + "222.jpg",
+            baseURL + "223.jpg",
+            baseURL + "224.jpg",
+            baseURL + "225.jpg",
+            baseURL + "226.jpg",
+            baseURL + "227.jpg",
+            baseURL + "228.jpg",
+            baseURL + "229.jpg",
+            baseURL + "230.jpg",
+            baseURL + "231.jpg",
+            baseURL + "232.jpg",
+            baseURL + "233.jpg",
+            baseURL + "234.jpg",
+            baseURL + "235.jpg",
+            baseURL + "236.jpg",
+            baseURL + "237.jpg",
+            baseURL + "238.jpg",
+            baseURL + "239.jpg",
+            baseURL + "240.jpg",
+            baseURL + "241.jpg",
+            baseURL + "242.jpg",
+            baseURL + "243.jpg",
+            baseURL + "244.jpg",
+            baseURL + "245.jpg",
+            baseURL + "246.jpg",
+            baseURL + "247.jpg",
+            baseURL + "248.jpg",
+            baseURL + "249.jpg",
+            baseURL + "250.jpg",
+            baseURL + "251.jpg",
+            baseURL + "252.jpg",
+            baseURL + "253.jpg",
+            baseURL + "254.jpg",
+            baseURL + "255.jpg",
+            baseURL + "256.jpg",
+            baseURL + "257.jpg",
+            baseURL + "258.jpg",
+            baseURL + "259.jpg",
+            baseURL + "260.jpg",
+            baseURL + "261.jpg",
+            baseURL + "262.jpg",
+            baseURL + "263.jpg",
+            baseURL + "264.jpg",
+            baseURL + "265.jpg",
+            baseURL + "266.jpg",
+            baseURL + "267.jpg",
+            baseURL + "268.jpg",
+            baseURL + "269.jpg",
+            baseURL + "270.jpg",
+            baseURL + "271.jpg",
+            baseURL + "272.jpg",
+            baseURL + "273.jpg",
+            baseURL + "274.jpg",
+            baseURL + "275.jpg",
+            baseURL + "276.jpg",
+            baseURL + "277.jpg",
+            baseURL + "278.jpg",
+            baseURL + "279.jpg",
+            baseURL + "280.jpg",
+            baseURL + "281.jpg",
+            baseURL + "282.jpg",
+            baseURL + "283.jpg",
+            baseURL + "284.jpg",
+            baseURL + "285.jpg",
+            baseURL + "286.jpg",
+            baseURL + "287.jpg",
+            baseURL + "288.jpg",
+            baseURL + "289.jpg",
+            baseURL + "290.jpg",
+            baseURL + "291.jpg",
+            baseURL + "292.jpg",
+            baseURL + "293.jpg",
+            baseURL + "294.jpg",
+            baseURL + "295.jpg",
+            baseURL + "296.jpg",
+            baseURL + "297.jpg",
+            baseURL + "298.jpg",
+            baseURL + "299.jpg",
+            baseURL + "300.jpg",
+        ];
+
+
+        const names = [
+            "Sakura", "Milly", "Zoe", "Angel", "Bella",
+            "Luna", "Anna", "Nina", "Emily", "Lisaa", "SalsaHot", "NadiaViral", "PutriLive", "AyuCute", "LunaHot",
+            "RaraViral", "MayaCantik", "VinaLive",
+            "DewiHot", "IndahLive", "CitraHot", "BellaViral", "TiaraLive", "NisaHot", "SintaCute", "RinaLive",
+            "MilaHot", "LiaViral", "AnisaLive", "PutriHot", "RaniCute", "YuniLive", "LalaHot", "DindaViral",
+            "NoviLive", "SariHot", "TikaCute", "AngelLive", "QueenHot", "BabyViral", "PrettyLive", "SweetHot",
+            "HoneyViral", "CherryLive", "RoseHot", "LilyViral", "Alya Safira", "Naya Putri", "Rina Amelia",
+            "Dinda Laras", "Sinta Aulia", "Maya Putri", "Bella Sari", "Alina Putri", "Rara Ayu", "Nisa Rahma",
+            "Tania Salsabila", "Dira Ananda", "Rina Lestari", "Bella Amara", "Aisha Putri", "Naya Lestari",
+            "Livia Putri", "Rara Kirana", "Alya Zahra", "Mira Anggraini", "Nabila Putri", "Sinta Maharani",
+            "Vina Larasati", "Tania Rahma", "Laila Aulia", "Alya Kirana", "Rina Safira", "Naya Amara",
+            "Bella Kirana", "Dinda Maharani", "Alina Safira", "Rara Lestari", "Nisa Amara", "Livia Salsabila",
+            "Maya Kirana", "Nabila Zahra", "Dira Safira", "Sinta Larasati", "Bella Maharani", "Alya Lestari",
+            "Naya Zahra", "Rina Maharani", "Tania Putri", "Mira Safira", "Laila Amara", "Vina Putri", "Aisha Rahma",
+            "Dinda Safira", "Bella Larasati", "Nisa Kirana", "Alina Zahra", "Maya Amara", "Livia Rahma",
+            "Rara Safira", "Alya Maharani", "Nabila Amara", "Sinta Zahra", "Dira Kirana", "Naya Salsabila",
+            "Bella Zahra", "Tania Laras", "Rina Amara", "Laila Kirana", "Alya Rahma", "Nisa Salsabila",
+            "Mira Lestari", "Nabila Kirana", "Bella Rahma", "Dinda Zahra", "Rara Amara", "Vina Safira",
+            "Maya Rahma", "Livia Zahra", "Naya Maharani", "Sinta Amara", "Alya Laras", "Bella Salsabila",
+            "Nisa Lestari", "Rina Zahra", "Dira Rahma", "Nabila Safira", "Mira Kirana", "Laila Zahra",
+            "Tania Amara", "Alya Amara", "Bella Putri", "Naya Kirana", "Dinda Amara", "Sinta Safira", "Rara Zahra",
+            "Maya Zahra", "Livia Amara", "Nabila Laras", "Aisha Kirana", "Vina Rahma", "Rina Kirana",
+            "Alya Salsabila", "Dira Zahra",
+        ]
+
+        function randomName() {
+            return names[Math.floor(Math.random() * names.length)]
+        }
+
+        function randomViews() {
+            return Math.floor(Math.random() * 9 + 1) + "K"
+        }
+
+        function randomImage() {
+            let index = Math.floor(Math.random() * photos.length)
+            return photos[index]
+        }
+
+        function randomRoomLink() {
+            let id = Math.floor(Math.random() * 99999)
+            return "live?id=" + id
+        }
+
+        let container = document.getElementById("rooms")
+
+        function generateRoom() {
+            let link = randomRoomLink()
+
+            return `
+<div class="col-6 col-md-3 col-lg-2">
+    <a href="${link}" class="room-link">
+        <div class="live-card">
+            <img src="${randomImage()}">
+            <div class="live-badge">• LIVE</div>
+            <div class="viewer">🔥 ${randomViews()}</div>
+            <div class="overlay">
+                <b>${randomName()}</b><br>
+            </div>
+        </div>
+    </a>
+</div>
+`
+        }
+
+        function loadRooms() {
+            for (let i = 0; i < 12; i++) {
+                container.innerHTML += generateRoom()
+            }
+        }
+        loadRooms()
+
+        window.addEventListener("scroll", () => {
+            if (window.innerHeight + window.scrollY >= document.body.offsetHeight - 200) {
+                loadRooms()
+            }
+        })
+    </script>
+
+</body>
+
+</html>
