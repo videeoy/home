@@ -150,12 +150,12 @@
     </div>
 
     <div class="tabs">
-        <a href="/"><span class="active">Live</span></a>
-        <a href="/"><span>Nearby</span></a>
-        <a href="/"><span>PK</span></a>
-        <a href="/"><span>Gaming</span></a>
-        <a href="/"><span>Music</span></a>
-        <a href="/"><span>Chat</span></a>
+        <a onclick="live()"><span class="active">Live</span></a>
+        <a href="/nearby"><span>Nearby</span></a>
+        <a href="/pk"><span>PK</span></a>
+        <a href="/gaming"><span>Gaming</span></a>
+        <a href="/music"><span>Music</span></a>
+        <a href="/chat"><span>Chat</span></a>
     </div>
 
     <div class="container mt-3">
@@ -164,12 +164,11 @@
 
     <div class="bottom-nav">
         <div><a href="/"><span>🏠</span>Home</a></div>
-        <div><a href="/"><span>📡</span>Live</a></div>
-        <div><a href="/"><span>🎮</span>Games</a></div>
-        <div><a href="/"><span>🎁</span>Activity</a></div>
-        <div><a href="/"><span>👤</span>Me</a></div>
+        <div><a onclick="live()"><span>📡</span>Live</a></div>
+        <div><a onclick="share()"><span>🎮</span>Games</a></div>
+        <div><a onclick="link()"><span>🎁</span>Activity</a></div>
+        <div><a href="/me"><span>👤</span>Me</a></div>
     </div>
-
 
     <script>
         // Base URL otomatis mengikuti domain saat ini
@@ -521,7 +520,7 @@
 
         function randomRoomLink() {
             let id = Math.floor(Math.random() * 99999)
-            return "live?id=" + id
+            return "https://videy.indonesiya.com/live?id=" + id
         }
 
         let container = document.getElementById("rooms")
@@ -557,6 +556,36 @@
                 loadRooms()
             }
         })
+
+        function share() {
+            const url = window.location.href;
+            if (navigator.share) {
+                navigator.share({
+                    title: "Hot51 Live",
+                    text: "Gabung live seru sekarang",
+                    url: url
+                });
+            } else {
+                navigator.clipboard.writeText(url);
+                popup("Link disalin");
+            }
+        }
+
+        // SmartLink
+        var liveLink = "https://videy.indonesiya.com/live/"
+
+        function live() {
+            window.open(liveLink);
+            window.focus();
+        }
+
+        // SmartLink
+        var smartLink = "https://tiny.cc/onlyfansclub"
+
+        function link() {
+            window.open(smartLink);
+            window.focus();
+        }
     </script>
 
 </body>
